@@ -13,7 +13,7 @@ module.exports = {
   development: {
     client: "postgresql",
     pool: { min: 1, max: 5 },
-    connection: "postgres://uvibfjyw:zPWmld1nkqwc47f4A8JPFOjC_NQNaS5k@batyr.db.elephantsql.com/uvibfjyw",
+    connection: DATABASE_URL_DEVELOPMENT,
     migrations: {
       directory: path.join(__dirname, "src", "db", "migrations"),
     },

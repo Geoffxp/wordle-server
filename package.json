@@ -1,4 +1,10 @@
 {
+  "name": "wordle-every-6-hours",
+  "version": "1",
+  "description": "Wordle server that serves a new word every 6 hours",
+  "license": "",
+  "author": "Goff",
+  "main": "./src/server.js",
   "scripts": {
     "run": "node src/server.js",
     "dev": "nodemon src/server.js"
@@ -11,5 +17,8 @@
     "knex": "^1.0.5",
     "nodemon": "^2.0.15",
     "pg": "^8.7.3"
+  },
+  "engines": {
+    "node": ">=0.10.0"
   }
 }
