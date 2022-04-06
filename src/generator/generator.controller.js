@@ -5,6 +5,7 @@ const asyncErrorBoundary = require("../errors/asyncErrorBoundary.js")
 const get = async (req, res) => {
     let lastUpdate = await service.getTime();
     let current = await service.getCurrent();
+    console.log(lastUpdate, current)
     if (!lastUpdate.time) {
         service.setTime({time: new Date()});
         service.setCurrent({current: 0});
