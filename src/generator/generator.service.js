@@ -5,12 +5,14 @@ const getTime = () => {
         .select("*")
         .where({"time_id": 1})
         .first()
+        .catch((err) => console.log(err));
 }
 const getCurrent = () => {
     return knex("currents")
         .select("*")
         .where({"current_id": 1})
         .first()
+        .catch((err) => console.log(err));
 }
 const setTime = (time) => {
     return knex("times")

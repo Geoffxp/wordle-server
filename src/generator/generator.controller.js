@@ -5,7 +5,6 @@ const asyncErrorBoundary = require("../errors/asyncErrorBoundary.js")
 const get = async (req, res) => {
     let lastUpdate = await service.getTime();
     let current = await service.getCurrent();
-    console.log(lastUpdate, current)
     if (!lastUpdate.time) {
         service.setTime({time: new Date()});
         service.setCurrent({current: 0});
@@ -15,7 +14,6 @@ const get = async (req, res) => {
     const currentTime = new Date();
     const lastTime = new Date(lastUpdate.time);
     const diff = ((currentTime / 1000) - (lastTime / 1000)) / 3600;
-    console.log(diff)
     if (diff > 6) {
         service.setTime({
             time_id: 1,
@@ -29,7 +27,15 @@ const get = async (req, res) => {
         lastUpdate = await service.getTime();
         current = await service.getCurrent();
     }
-    return res.status(200).json({data: words[current.current]});
+    return res.status(200).json({
+        data: {
+            word: words[current.current],
+            list: words,
+            current: current.current,
+            timeToUpdate: diff,
+            lastTime: lastTime
+        }
+    });
 }
 const getList = (req, res) => {
     return res.status(200).json({data: words});
