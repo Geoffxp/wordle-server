@@ -2,6 +2,7 @@ const path = require("path");
 const generatorRouter = require("./generator/generator.router");
 const battleRouter = require("./battle/battle.router");
 const chatRouter = require("./chat/chat.router");
+const userRouter = require("./user/user.router")
 
 const cors = require("cors");
 
@@ -16,5 +17,6 @@ app.use(express.json());
 app.use("/", generatorRouter);
 app.use("/battle", battleRouter);
 app.use("/chat", chatRouter);
+app.use("/user", userRouter);
 
 module.exports = app;

@@ -13,7 +13,7 @@ const get = async (req, res) => {
     }
     const currentTime = new Date();
     const lastTime = new Date(lastUpdate.time);
-    const diff = ((currentTime / 1000) - (lastTime / 1000)) / 3600;
+    let diff = ((currentTime / 1000) - (lastTime / 1000)) / 3600;
     if (diff > 6) {
         service.setTime({
             time_id: 1,
@@ -26,6 +26,7 @@ const get = async (req, res) => {
         });
         lastUpdate = await service.getTime();
         current = await service.getCurrent();
+        diff = 0;
     }
     return res.status(200).json({
         data: {

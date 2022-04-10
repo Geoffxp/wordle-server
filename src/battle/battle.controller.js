@@ -3,6 +3,7 @@ let games = [];
 
 const sendGameData = (req, res, next) => {
     const { token } = req.query;
+    const { playerName } = req.query;
     if (token) {
         const game = games.find(g => g.token == token);
         games = games.filter(g => g.timeout == false);
@@ -11,7 +12,7 @@ const sendGameData = (req, res, next) => {
         for (let game of games) {
             if (game.players.length < 2) {
                 game.players.push({
-                    playerName: 2,
+                    playerName: playerName ? playerName : 2,
                     lastGuess: ''
                 })
                 return res.status(202).json({...game}) 
@@ -22,7 +23,7 @@ const sendGameData = (req, res, next) => {
             token: Date.now(),
             players: [
                 {
-                    playerName: 1,
+                    playerName: playerName ? playerName : 1,
                     lastGuess: ''
                 }
             ],
