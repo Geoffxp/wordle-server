@@ -1,4 +1,5 @@
 const words = require("../../words.js");
+const goodWords = require("../../goodWords.js");
 const service = require("./generator.service.js")
 const asyncErrorBoundary = require("../errors/asyncErrorBoundary.js")
 
@@ -30,7 +31,7 @@ const get = async (req, res) => {
     }
     return res.status(200).json({
         data: {
-            word: words[current.current],
+            word: goodWords[current.current],
             list: words,
             current: current.current,
             timeToUpdate: diff,

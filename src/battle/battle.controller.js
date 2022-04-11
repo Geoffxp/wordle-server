@@ -1,4 +1,5 @@
 const words = require("../../words.js");
+const goodWords = require("../../goodWords.js");
 let games = [];
 
 const sendGameData = (req, res, next) => {
@@ -28,7 +29,7 @@ const sendGameData = (req, res, next) => {
                 }
             ],
             winner: null,
-            word: words[Math.floor(Math.random() * words.length)],
+            word: goodWords[Math.floor(Math.random() * goodWords.length)],
             timeout: false,
             isRunning: false
         }
