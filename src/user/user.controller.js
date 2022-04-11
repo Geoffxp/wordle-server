@@ -10,8 +10,6 @@ const login = async (req, res) => {
     const { session } = req.body;
     const { userCreated } = res.locals;
 
-    console.log(username, password, session, userCreated)
-
     const user = await service.find(username);
     if (session && user.session == session) {
         return res.status(200).json({
