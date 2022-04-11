@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
+const asyncErrorBoundary = require("../errors/asyncErrorBoundary.js")
 
 const service = require("./user.service")
 
@@ -53,6 +54,6 @@ const signup = async (req, res, next) => {
 }
 
 module.exports = {
-    login,
-    signup: [signup, login]
+    login: [asyncErrorBoundary(login)],
+    signup: [asyncErrorBoundary(signup), asyncErrorBoundary(login)]
 }

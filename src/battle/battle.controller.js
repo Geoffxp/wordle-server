@@ -38,7 +38,7 @@ const sendGameData = (req, res, next) => {
             if (!newGame.isRunning) {
                 newGame.timeout = true;
             }
-        }, 60000)
+        }, 120000)
         return res.status(202).json(newGame)
     }
 }
@@ -46,11 +46,11 @@ const startGame = (req, res, next) => {
     const { token, isRunning } = req.body;
     const game = games.find(g => g.token == token);
     game.isRunning = true;
-    game.killTime = game.killTime ? game.killTime : Date.now() + 60000;
+    game.killTime = game.killTime ? game.killTime : Date.now() + 120000;
 
     setTimeout(() => {
         game.isRunning = false;
-    }, 60000)
+    }, 120000)
     return res.status(200).json({...game})
 
 }
