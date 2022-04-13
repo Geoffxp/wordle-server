@@ -67,6 +67,9 @@ const startGame = (req, res, next) => {
         setTimeout(() => {
             if (game.isRunning) {
                 game.isRunning = false;
+                setInterval(() => {
+                    if (game) game.timeout = true;
+                }, 10000)
                 updateUser(
                     game.players[0].playerName, 
                     game,
@@ -92,7 +95,11 @@ const updateGame = (req, res) => {
         if (game.players[0].lastGuess === game.word) {
             game.winner = game.players[0];
             game.isRunning = false;
-            game.timeout = true;
+
+            setInterval(() => {
+                if (game) game.timeout = true;
+            }, 10000)
+
             updateUser(
                 game.players[0].playerName, 
                 game,
@@ -103,7 +110,11 @@ const updateGame = (req, res) => {
         if (game.players[1].lastGuess === game.word) {
             game.winner = game.players[1];
             game.isRunning = false;
-            game.timeout = true;
+
+            setInterval(() => {
+                if (game) game.timeout = true;
+            }, 10000)
+
             updateUser(
                 game.players[0].playerName, 
                 game,
