@@ -90,7 +90,7 @@ const updateGame = (req, res) => {
     const data = req.body;
     const { player } = req.query;
     const game = games.find(g => g.token == data.token);
-    game.players[player] = data.players[player];
+    if (game) game.players[player] = data.players[player];
     if (player == 0) {
         if (game.players[0].lastGuess === game.word) {
             game.winner = game.players[0];
