@@ -18,7 +18,7 @@ const sendGameData = async (req, res, next) => {
             lastGuess: '',
         }
     }
-    if (token) {
+    if (token && games.length) {
         const game = games.find(g => g.token == token);
         games = games.filter(g => g.timeout == false);
         return res.status(202).json({...game}) 
@@ -90,65 +90,69 @@ const updateGame = (req, res) => {
     const data = req.body;
     const { player } = req.query;
     const game = games.find(g => g.token == data.token);
-    if (game) game.players[player] = data.players[player];
-    if (player == 0) {
-        if (game.players[0].lastGuess === game.word) {
-            game.winner = game.players[0];
-            game.isRunning = false;
+    if (game) {
+        game.players[player] = data.players[player];
+        if (player == 0) {
+            if (game.players[0].lastGuess === game.word) {
+                game.winner = game.players[0];
+                game.isRunning = false;
 
-            setInterval(() => {
-                if (game) game.timeout = true;
-            }, 10000)
+                setInterval(() => {
+                    if (game) game.timeout = true;
+                }, 10000)
 
-            updateUser(
-                game.players[0].playerName, 
-                game,
-                'win',
-                eloCalc({elo: game.players[0].elo, score: 1}, {elo: game.players[1].elo, score: 0}));
-            //updateUsers(player, loser, game)
+                updateUser(
+                    game.players[0].playerName, 
+                    game,
+                    'win',
+                    eloCalc({elo: game.players[0].elo, score: 1}, {elo: game.players[1].elo, score: 0}));
+                //updateUsers(player, loser, game)
+            }
+            if (game.players[1].lastGuess === game.word) {
+                game.winner = game.players[1];
+                game.isRunning = false;
+
+                setInterval(() => {
+                    if (game) game.timeout = true;
+                }, 10000)
+
+                updateUser(
+                    game.players[0].playerName, 
+                    game,
+                    'loss',
+                    eloCalc({elo: game.players[0].elo, score: 0}, {elo: game.players[1].elo, score: 1}));
+                //updateUsers(player, loser, game)
+            }
         }
-        if (game.players[1].lastGuess === game.word) {
-            game.winner = game.players[1];
-            game.isRunning = false;
-
-            setInterval(() => {
-                if (game) game.timeout = true;
-            }, 10000)
-
-            updateUser(
-                game.players[0].playerName, 
-                game,
-                'loss',
-                eloCalc({elo: game.players[0].elo, score: 0}, {elo: game.players[1].elo, score: 1}));
-            //updateUsers(player, loser, game)
+        if (player == 1) {
+            if (game.players[0].lastGuess === game.word) {
+                game.winner = game.players[0];
+                game.isRunning = false;
+                game.timeout = true;
+                updateUser(
+                    game.players[1].playerName, 
+                    game,
+                    'loss',
+                    eloCalc({elo: game.players[1].elo, score: 0}, {elo: game.players[0].elo, score: 1}));
+                //updateUsers(player, loser, game)
+            }
+            if (game.players[1].lastGuess === game.word) {
+                game.winner = game.players[1];
+                game.loser = game.players[0];
+                game.isRunning = false;
+                game.timeout = true;
+                updateUser(
+                    game.players[1].playerName, 
+                    game,
+                    'win',
+                    eloCalc({elo: game.players[1].elo, score: 1}, {elo: game.players[0].elo, score: 0}));
+                //updateUsers(player, loser, game)
+            }
         }
+        return res.status(200).json({...game})
+    } else {
+        return res.status(404).json({message: 'game not found'})
     }
-    if (player == 1) {
-        if (game.players[0].lastGuess === game.word) {
-            game.winner = game.players[0];
-            game.isRunning = false;
-            game.timeout = true;
-            updateUser(
-                game.players[1].playerName, 
-                game,
-                'loss',
-                eloCalc({elo: game.players[1].elo, score: 0}, {elo: game.players[0].elo, score: 1}));
-            //updateUsers(player, loser, game)
-        }
-        if (game.players[1].lastGuess === game.word) {
-            game.winner = game.players[1];
-            game.loser = game.players[0];
-            game.isRunning = false;
-            game.timeout = true;
-            updateUser(
-                game.players[1].playerName, 
-                game,
-                'win',
-                eloCalc({elo: game.players[1].elo, score: 1}, {elo: game.players[0].elo, score: 0}));
-            //updateUsers(player, loser, game)
-        }
-    }
-    return res.status(200).json({...game})
 }
 const eloCalc = (playerOne, playerTwo) => {
     const kFactor = 32;
@@ -162,15 +166,17 @@ const eloCalc = (playerOne, playerTwo) => {
 const updateUser = async (username, game, state, elo) => {
     const user = await userService.find(username);
     if (user) {
-        userService.addGame(username, JSON.stringify(game));
-        if (state === 'win') {
-            userService.addWin(username);
-        } else if (state === 'loss') {
-            userService.addLoss(username);
-        } else {
-            userService.addTie(username);
-        }
-        userService.changeElo(username, elo);
+        userService.addGame(username, JSON.stringify(game)).then(() => {
+            if (state === 'win') {
+                userService.addWin(username);
+            } else if (state === 'loss') {
+                userService.addLoss(username);
+            } else {
+                userService.addTie(username);
+            }
+        }).then(() => {
+            userService.changeElo(username, elo);
+        }).catch((err) => console.log(err))
     }
 }
 const clearGames = (req, res) => {

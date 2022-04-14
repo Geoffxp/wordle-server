@@ -1,4 +1,3 @@
-const { parse } = require("dotenv");
 const knex = require("../db/connection");
 
 const find = (username) => {
@@ -11,9 +10,11 @@ const addGame = async (username, game) => {
     const user = await find(username);
     if (user) {
         if (user.games) {
+            let lastFifty = user.games.slice(-49);
+            lastFifty = [...lastFifty, game]
             return knex('users')
                 .where({'username': username})
-                .update({'games': [...user.games, game]})
+                .update({'games': lastFifty})
                 .returning('games')
                 .catch(console.log)
         } else {
@@ -58,7 +59,6 @@ const changeElo = async (username, elo) => {
         .catch(console.log)
 }
 const setSession = (username, session) => {
-    console.log(username, session)
     return knex('users')
         .where({'username': username})
         .update({'session': session})
