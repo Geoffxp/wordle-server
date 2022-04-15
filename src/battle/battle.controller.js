@@ -8,53 +8,61 @@ const sendGameData = async (req, res, next) => {
     const { token } = req.query;
     const { playerName } = req.query;
     let player;
-    if (playerName) {
-        player = await userService.find(playerName);
-        player = {
-            losses: player.losses,
-            wins: player.wins,
-            elo: player.elo,
-            playerName: player.username,
-            lastGuess: '',
-        }
-    }
-    if (token && games.length) {
-        const game = games.find(g => g.token == token);
-        games = games.filter(g => g.timeout == false);
-        return res.status(202).json({...game}) 
-    }  else if (games.some(g => g.players.length < 2 && g.timeout == false)){
-        for (let game of games) {
-            if (game.players.length < 2) {
-                game.players.push({
-                    playerName: playerName ? playerName : 2,
-                    elo: player ? player.elo : 400,
-                    lastGuess: ''
-                })
-                return res.status(202).json({...game}) 
+    if (games) {
+        if (playerName) {
+            player = await userService.find(playerName);
+            player = {
+                losses: player.losses,
+                wins: player.wins,
+                elo: player.elo,
+                playerName: player.username,
+                lastGuess: '',
             }
+        }
+        if (token && games.length) {
+            games = games.filter(g => g.timeout == false);
+            const game = games.find(g => g.token == token);
+            if (game) {
+                return res.status(202).json({...game}) 
+            } else {
+                return res.sendStatus(404);
+            }
+        }  else if (games.some(g => g.players.length < 2 && g.timeout == false)) {
+            for (let game of games) {
+                if (game.players.length < 2) {
+                    game.players.push({
+                        playerName: playerName ? playerName : 2,
+                        elo: player ? player.elo : 400,
+                        lastGuess: ''
+                    })
+                    return res.status(202).json({...game}) 
+                }
+            }
+        } else {
+            const newGame = {
+                token: Date.now(),
+                players: [
+                    {
+                        playerName: playerName ? playerName : 1,
+                        elo: player ? player.elo : 400,
+                        lastGuess: ''
+                    }
+                ],
+                winner: null,
+                word: goodWords[Math.floor(Math.random() * goodWords.length)],
+                timeout: false,
+                isRunning: false
+            }
+            games.push(newGame)
+            setTimeout(() => {
+                if (!newGame.isRunning) {
+                    newGame.timeout = true;
+                }
+            }, 60000)
+            return res.status(202).json(newGame)
         }
     } else {
-        const newGame = {
-            token: Date.now(),
-            players: [
-                {
-                    playerName: playerName ? playerName : 1,
-                    elo: player ? player.elo : 400,
-                    lastGuess: ''
-                }
-            ],
-            winner: null,
-            word: goodWords[Math.floor(Math.random() * goodWords.length)],
-            timeout: false,
-            isRunning: false
-        }
-        games.push(newGame)
-        setTimeout(() => {
-            if (!newGame.isRunning) {
-                newGame.timeout = true;
-            }
-        }, 60000)
-        return res.status(202).json(newGame)
+        return res.sendStatus(500)
     }
 }
 const startGame = (req, res, next) => {
